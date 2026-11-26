@@ -1,0 +1,39 @@
+<%- include("partials/head", { title: "Tables" }) %>
+<h1>Tables</h1>
+<% if (error) { %><div class="note"><%= error %></div><% } %>
+
+<section class="card">
+  <h2>Your tables</h2>
+  <% if (!tables.length) { %><p class="dim">No tables yet. Create one below.</p><% } %>
+  <% tables.forEach(t => { %>
+    <a class="row" href="/tables/<%= t.name %>">
+      <b><%= t.name %></b>
+      <span class="dim"><%= t.columns.length %> columns · <%= counts[t.name] || 0 %> records</span>
+    </a>
+  <% }) %>
+</section>
+
+<section class="card">
+  <h2>New table</h2>
+  <form method="post" action="/tables">
+    <label>Table name</label>
+    <input name="name" placeholder="songs" required pattern="[a-z0-9_\-]{1,40}">
+    <label>Columns</label>
+    <div id="cols">
+      <div class="colrow">
+        <input name="colName" placeholder="column name" required>
+        <select name="colType"><% types.forEach(x => { %><option><%= x %></option><% }) %></select>
+      </div>
+    </div>
+    <button type="button" id="addcol" class="ghost">+ Add column</button>
+    <button type="submit">Create table</button>
+  </form>
+</section>
+<script>
+document.getElementById("addcol").onclick = function () {
+  var c = document.querySelector(".colrow").cloneNode(true);
+  c.querySelector("input").value = "";
+  document.getElementById("cols").appendChild(c);
+};
+</script>
+<%- include("partials/foot") %>

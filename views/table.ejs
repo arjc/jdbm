@@ -1,0 +1,45 @@
+<%- include("partials/head", { title: t.name }) %>
+<% const show = (v, type) => v == null || v === "" ? "—" : type === "boolean" ? (v ? "yes" : "no") : type === "date" ? new Date(v).toISOString().slice(0, 10) : String(v); %>
+<p><a href="/">← All tables</a></p>
+<h1><%= t.name %></h1>
+
+<section class="card">
+  <h2>API endpoint</h2>
+  <pre>GET <%= base %>/api/<%= t.name %>
+GET <%= base %>/api/<%= t.name %>/:id</pre>
+</section>
+
+<section class="card">
+  <h2>Add record</h2>
+  <form method="post" action="/tables/<%= t.name %>/records">
+    <% t.columns.forEach(c => { %>
+      <label><%= c.name %> <span class="dim">(<%= c.type %>)</span></label>
+      <% if (c.type === "longtext") { %><textarea name="<%= c.name %>" rows="4"></textarea>
+      <% } else if (c.type === "number") { %><input type="number" step="any" name="<%= c.name %>">
+      <% } else if (c.type === "boolean") { %><input type="checkbox" name="<%= c.name %>">
+      <% } else if (c.type === "date") { %><input type="date" name="<%= c.name %>">
+      <% } else { %><input type="text" name="<%= c.name %>"><% } %>
+    <% }) %>
+    <button type="submit">Add record</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Records (<%= records.length %>)</h2>
+  <% if (!records.length) { %><p class="dim">No records yet.</p><% } else { %>
+  <div class="scroll"><table>
+    <tr><% t.columns.forEach(c => { %><th><%= c.name %></th><% }) %><th></th></tr>
+    <% records.forEach(r => { %>
+      <tr>
+        <% t.columns.forEach(c => { %><td><%= show(r.data[c.name], c.type) %></td><% }) %>
+        <td><form method="post" action="/tables/<%= t.name %>/records/<%= r._id %>/delete" onsubmit="return confirm('Delete this record?')"><button class="small">Delete</button></form></td>
+      </tr>
+    <% }) %>
+  </table></div>
+  <% } %>
+</section>
+
+<form method="post" action="/tables/<%= t.name %>/delete" onsubmit="return confirm('Delete this table and all its records?')">
+  <button class="ghost">Delete table</button>
+</form>
+<%- include("partials/foot") %>
