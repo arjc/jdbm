@@ -1,6 +1,8 @@
-# JDBM – Janitor Jibesh Database Monk
+# Janitor Jibesh Database Monk [GET STARTED](https://arjc.github.io/jdbm/)
 
-A tiny headless CMS. Create custom tables in a web dashboard, define columns, add records, and every table gets a read-only REST API for your other sites.
+
+Password protected public headless CMS which allows you to manage your database from any device.
+Create custom tables in a web dashboard, define columns, add records, and every table gets a read-only REST API for your other sites.
 
 Stack: Node.js, Express, EJS, MongoDB (Mongoose).
 
