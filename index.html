@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JDBM – Janitor Jibesh Database Monk</title>
+<style>
+:root{--bg:#000;--fg:#fff;--dim:#bdbdbd;--line:#fff;box-sizing:border-box;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Courier New",ui-monospace,Menlo,monospace;line-height:1.55;min-height:100vh;display:flex;flex-direction:column}
+header{border-bottom:4px solid var(--line);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:900;font-size:22px;letter-spacing:2px;border:3px solid var(--line);padding:2px 10px;box-shadow:4px 4px 0 var(--fg)}
+.tag{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+main{flex:1;width:100%;max-width:860px;margin:0 auto;padding:28px 20px}
+.progress{display:flex;gap:6px;margin-bottom:24px}
+.progress i{flex:1;height:14px;border:2px solid var(--line);background:transparent}
+.progress i.on{background:var(--fg)}
+.card{border:4px solid var(--line);padding:28px;box-shadow:10px 10px 0 var(--fg);background:var(--bg)}
+.kicker{display:inline-block;background:var(--fg);color:var(--bg);font-weight:900;padding:2px 10px;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+h1{font-size:clamp(34px,8vw,64px);line-height:1.02;margin:0 0 16px;text-transform:uppercase;letter-spacing:-1px}
+h2{font-size:clamp(24px,5vw,34px);margin:0 0 14px;text-transform:uppercase}
+p{margin:0 0 14px}
+.dim{color:var(--dim)}
+ol,ul{padding-left:22px;margin:0 0 16px}
+li{margin-bottom:8px}
+code{border:1px solid var(--line);padding:0 5px}
+.code{position:relative;border:3px solid var(--line);margin:0 0 16px;background:#0a0a0a}
+.code pre{margin:0;padding:14px 16px;padding-right:90px;overflow-x:auto;font-size:14px;white-space:pre}
+.code button{position:absolute;top:8px;right:8px;padding:3px 10px;font-size:12px;box-shadow:3px 3px 0 var(--fg)}
+.code .lbl{display:block;border-bottom:3px solid var(--line);padding:3px 12px;font-size:12px;letter-spacing:1px;text-transform:uppercase;background:var(--fg);color:var(--bg);font-weight:900}
+table{width:100%;border-collapse:collapse;margin:0 0 16px;display:block;overflow-x:auto}
+th,td{border:2px solid var(--line);padding:8px 10px;text-align:left;font-size:14px}
+th{background:var(--fg);color:var(--bg);text-transform:uppercase}
+.note{border:3px dashed var(--line);padding:12px 14px;margin:0 0 16px;font-size:14px}
+button,.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:2px;background:var(--bg);color:var(--fg);border:3px solid var(--line);padding:12px 24px;cursor:pointer;box-shadow:6px 6px 0 var(--fg);text-decoration:none;display:inline-block;transition:transform .08s,box-shadow .08s}
+button:hover,.btn:hover{background:var(--fg);color:var(--bg)}
+button:active,.btn:active{transform:translate(6px,6px);box-shadow:0 0 0 var(--fg)}
+.big{font-size:20px;padding:16px 34px}
+.nav{display:flex;justify-content:space-between;gap:14px;margin-top:26px;flex-wrap:wrap}
+.nav .ghost{box-shadow:none;border-style:dashed}
+footer{border-top:4px solid var(--line);padding:18px 20px;text-align:center;font-size:14px}
+footer a{color:var(--fg);font-weight:900}
+a{color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:22px 0 4px}
+.grid div{border:3px solid var(--line);padding:12px}
+.grid b{display:block;text-transform:uppercase;margin-bottom:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">JDBM</div>
+  <div class="tag">Janitor Jibesh Database Monk</div>
+</header>
+<main>
+  <div class="progress" id="progress"></div>
+  <div class="card" id="card"></div>
+</main>
+<footer>
+  Open source under the MIT License · Created by <a id="author" href="#" target="_blank" rel="noopener">Arjun M Liji</a> · <a id="repoLink" href="#" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script>
+/* ===== EDIT THESE ===== */
+const CFG = {
+  repo: "https://github.com/YOUR-USERNAME/JDBM",
+  author: "https://github.com/YOUR-USERNAME",
+  buildCmd: "npm install",
+  startCmd: "npm start",
+  apiPath: "/api/",
+  env: [
+    ["PORT", "Render sets this automatically. Leave it out."],
+    ["DATABASE_URL", "Your database connection string (match your .env.example)."],
+    ["SESSION_SECRET", "Any long random string."]
+  ]
+};
+/* ====================== */
+document.getElementById("repoLink").href = CFG.repo;
+document.getElementById("author").href = CFG.author;
+
+const code = (label, text) => `<div class="code"><span class="lbl">${label}</span><pre>${text.replace(/</g,"&lt;")}</pre><button data-copy>Copy</button></div>`;
+
+const steps = [
+  { // 0 welcome
+    html: () => `
+      <span class="kicker">Open source · MIT</span>
+      <h1>Janitor Jibesh<br>Database Monk</h1>
+      <p>JDBM is a tiny headless CMS. Create custom tables in a web interface, define their columns, add records, and every table instantly gets its own REST API for your other websites.</p>
+      <div class="grid">
+        <div><b>Tables</b>Name them, shape them.</div>
+        <div><b>Records</b>Add data from a simple UI.</div>
+        <div><b>REST API</b>One endpoint per table.</div>
+      </div>
+      <div class="nav"><span></span><button class="big" data-next>Get Started</button></div>`
+  },
+  { title: "Fork the project", html: () => `
+      <p>Forking gives you your own copy of JDBM that Render can deploy.</p>
+      <ol>
+        <li>Open the JDBM repository on GitHub.</li>
+        <li>Click <code>Fork</code> in the top right.</li>
+        <li>Choose your account and confirm.</li>
+      </ol>
+      <a class="btn" href="${CFG.repo}/fork" target="_blank" rel="noopener">Fork on GitHub ↗</a>` },
+  { title: "Create a Render account", html: () => `
+      <ol>
+        <li>Go to <a href="https://render.com" target="_blank" rel="noopener">render.com</a> and sign up.</li>
+        <li>Choose <code>Sign up with GitHub</code> so Render can see your fork.</li>
+        <li>Authorize Render to access your repositories.</li>
+      </ol>
+      <div class="note">Tip: you only need access to your JDBM fork. You can limit Render to selected repositories.</div>` },
+  { title: "Create a Web Service", html: () => `
+      <ol>
+        <li>In the Render dashboard click <code>New +</code> → <code>Web Service</code>.</li>
+        <li>Pick your forked <code>JDBM</code> repository.</li>
+        <li>Choose a name, a region, and the branch <code>main</code>.</li>
+        <li>Runtime: <code>Node</code>.</li>
+      </ol>
+      ${code("Build command", CFG.buildCmd)}
+      ${code("Start command", CFG.startCmd)}` },
+  { title: "Add environment variables", html: () => `
+      <p>Open the <code>Environment</code> section of your service and add these:</p>
+      <table><tr><th>Key</th><th>What to put</th></tr>
+      ${CFG.env.map(e=>`<tr><td><code>${e[0]}</code></td><td>${e[1]}</td></tr>`).join("")}</table>
+      <p class="dim">Running locally instead? Put the same keys in a <code>.env</code> file in the project root.</p>
+      ${code(".env", CFG.env.filter(e=>e[0]!=="PORT").map(e=>e[0]+"=").join("\n"))}` },
+  { title: "Deploy", html: () => `
+      <ol>
+        <li>Click <code>Create Web Service</code>.</li>
+        <li>Watch the logs until you see the server is running.</li>
+        <li>Open the <code>.onrender.com</code> URL Render gives you.</li>
+      </ol>
+      <div class="note">Free Render services sleep after inactivity, so the first request can take about a minute to wake up.</div>` },
+  { title: "Create your first table", html: () => `
+      <ol>
+        <li>Open your JDBM URL in the browser.</li>
+        <li>Create a new table, for example <code>songs</code>.</li>
+        <li>Add columns: <code>name</code>, <code>artist</code>, <code>description</code>.</li>
+        <li>Open the table and add a few records.</li>
+      </ol>
+      <p>Other ideas: a <code>blog</code> table (title, body, date) or a <code>projects</code> table (name, link, stack).</p>` },
+  { title: "Use it in your projects", html: () => `
+      <p>Every table has an endpoint. Fetch it from any site:</p>
+      ${code("JavaScript", `const BASE = "https://your-app.onrender.com";
+
+const res = await fetch(BASE + "${CFG.apiPath}songs");
+const songs = await res.json();
+
+songs.forEach(s => console.log(s.name, "-", s.artist));`)}
+      ${code("curl", `curl https://your-app.onrender.com${CFG.apiPath}songs`)}
+      <p class="dim">If your other site runs on a different domain, make sure CORS is enabled in your JDBM server.</p>` },
+  { title: "You're done", html: () => `
+      <span class="kicker">Setup complete</span>
+      <p>Your JDBM is live. Create tables, add records, and plug the endpoints into your websites.</p>
+      <ul>
+        <li>Found a bug or want a feature? Open an issue on GitHub.</li>
+        <li>Pull requests are welcome.</li>
+        <li>Star the repo if JDBM helps you.</li>
+      </ul>
+      <a class="btn" href="${CFG.repo}" target="_blank" rel="noopener">View on GitHub ↗</a>` }
+];
+
+let i = 0;
+const card = document.getElementById("card"), prog = document.getElementById("progress");
+function render(){
+  const s = steps[i];
+  prog.innerHTML = steps.map((_,k)=>`<i class="${k<=i&&i>0?'on':''}"></i>`).join("");
+  prog.style.visibility = i===0 ? "hidden" : "visible";
+  if(i===0){ card.innerHTML = s.html(); }
+  else {
+    const last = i===steps.length-1;
+    card.innerHTML = `<span class="kicker">Step ${i} of ${steps.length-1}</span><h2>${s.title}</h2>${s.html()}
+      <div class="nav"><button class="ghost" data-back>Back</button>${last?'<button data-restart>Start over</button>':'<button data-next>Next</button>'}</div>`;
+  }
+  window.scrollTo(0,0);
+}
+card.addEventListener("click", e=>{
+  const t = e.target.closest("button"); if(!t) return;
+  if(t.hasAttribute("data-next")){ i++; render(); }
+  else if(t.hasAttribute("data-back")){ i--; render(); }
+  else if(t.hasAttribute("data-restart")){ i=0; render(); }
+  else if(t.hasAttribute("data-copy")){
+    const txt = t.parentElement.querySelector("pre").textContent;
+    const done = ()=>{ t.textContent="Copied"; setTimeout(()=>t.textContent="Copy",1200); };
+    try{ navigator.clipboard.writeText(txt).then(done,done); }catch(_){ done(); }
+  }
+});
+render();
+</script>
+</body>
+</html>
