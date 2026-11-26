@@ -4,198 +4,322 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JDBM – Janitor Jibesh Database Monk</title>
+<meta name="description" content="JDBM: password-protected, public headless CMS to manage your database from any device. REST API with NoSQL database.">
 <style>
 :root{--bg:#000;--fg:#fff;--dim:#bdbdbd;--line:#fff;box-sizing:border-box;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:"Courier New",ui-monospace,Menlo,monospace;line-height:1.55;min-height:100vh;display:flex;flex-direction:column}
-header{border-bottom:4px solid var(--line);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{font-weight:900;font-size:22px;letter-spacing:2px;border:3px solid var(--line);padding:2px 10px;box-shadow:4px 4px 0 var(--fg)}
-.tag{font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
-main{flex:1;width:100%;max-width:860px;margin:0 auto;padding:28px 20px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Courier New",ui-monospace,Menlo,monospace;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+header{border-bottom:4px solid var(--line);padding:14px 20px}
+.logo{font-weight:900;font-size:22px;letter-spacing:2px;border:3px solid var(--line);padding:2px 10px;box-shadow:4px 4px 0 var(--fg);text-decoration:none;color:var(--fg);display:inline-block;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.logo:hover{background:var(--fg);color:var(--bg)}
+.logo:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--fg)}
+main{flex:1;width:100%;max-width:820px;margin:0 auto;padding:28px 20px}
 .progress{display:flex;gap:6px;margin-bottom:24px}
-.progress i{flex:1;height:14px;border:2px solid var(--line);background:transparent}
+.progress i{flex:1;height:14px;border:2px solid var(--line)}
 .progress i.on{background:var(--fg)}
-.card{border:4px solid var(--line);padding:28px;box-shadow:10px 10px 0 var(--fg);background:var(--bg)}
-.kicker{display:inline-block;background:var(--fg);color:var(--bg);font-weight:900;padding:2px 10px;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
-h1{font-size:clamp(34px,8vw,64px);line-height:1.02;margin:0 0 16px;text-transform:uppercase;letter-spacing:-1px}
-h2{font-size:clamp(24px,5vw,34px);margin:0 0 14px;text-transform:uppercase}
+.card{border:4px solid var(--line);padding:26px;box-shadow:10px 10px 0 var(--fg)}
+.kicker{display:inline-block;background:var(--fg);color:var(--bg);font-weight:900;padding:2px 10px;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:clamp(40px,10vw,72px);line-height:1;margin:0 0 10px;text-transform:uppercase;letter-spacing:-1px}
+h2{font-size:clamp(24px,5vw,32px);margin:0 0 16px;text-transform:uppercase}
 p{margin:0 0 14px}
 .dim{color:var(--dim)}
 ol,ul{padding-left:22px;margin:0 0 16px}
-li{margin-bottom:8px}
+li{margin-bottom:6px}
 code{border:1px solid var(--line);padding:0 5px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px;font-weight:900}
+.flow span{border:3px solid var(--line);padding:4px 12px}
+.flow b{font-size:20px}
 .code{position:relative;border:3px solid var(--line);margin:0 0 16px;background:#0a0a0a}
-.code pre{margin:0;padding:14px 16px;padding-right:90px;overflow-x:auto;font-size:14px;white-space:pre}
+.code pre{margin:0;padding:12px 16px;padding-right:90px;overflow-x:auto;font-size:14px;white-space:pre}
 .code button{position:absolute;top:8px;right:8px;padding:3px 10px;font-size:12px;box-shadow:3px 3px 0 var(--fg)}
 .code .lbl{display:block;border-bottom:3px solid var(--line);padding:3px 12px;font-size:12px;letter-spacing:1px;text-transform:uppercase;background:var(--fg);color:var(--bg);font-weight:900}
 table{width:100%;border-collapse:collapse;margin:0 0 16px;display:block;overflow-x:auto}
-th,td{border:2px solid var(--line);padding:8px 10px;text-align:left;font-size:14px}
+th,td{border:2px solid var(--line);padding:6px 10px;text-align:left;font-size:14px}
 th{background:var(--fg);color:var(--bg);text-transform:uppercase}
-.note{border:3px dashed var(--line);padding:12px 14px;margin:0 0 16px;font-size:14px}
+.note{border:3px dashed var(--line);padding:8px 12px;margin:0 0 16px;font-size:14px}
 button,.btn{font:inherit;font-weight:900;text-transform:uppercase;letter-spacing:2px;background:var(--bg);color:var(--fg);border:3px solid var(--line);padding:12px 24px;cursor:pointer;box-shadow:6px 6px 0 var(--fg);text-decoration:none;display:inline-block;transition:transform .08s,box-shadow .08s}
 button:hover,.btn:hover{background:var(--fg);color:var(--bg)}
 button:active,.btn:active{transform:translate(6px,6px);box-shadow:0 0 0 var(--fg)}
 .big{font-size:20px;padding:16px 34px}
-.nav{display:flex;justify-content:space-between;gap:14px;margin-top:26px;flex-wrap:wrap}
+.nav{display:flex;justify-content:space-between;gap:14px;margin-top:24px;flex-wrap:wrap}
 .nav .ghost{box-shadow:none;border-style:dashed}
 footer{border-top:4px solid var(--line);padding:18px 20px;text-align:center;font-size:14px}
 footer a{color:var(--fg);font-weight:900}
 a{color:var(--fg)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:22px 0 4px}
-.grid div{border:3px solid var(--line);padding:12px}
-.grid b{display:block;text-transform:uppercase;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:22px 0 4px}
+.grid div{border:3px solid var(--line);padding:12px;font-weight:900;text-transform:uppercase}
+.grid i{display:block;font-style:normal;font-size:28px}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.tab{padding:6px 12px;font-size:13px;letter-spacing:1px;box-shadow:3px 3px 0 var(--fg)}
+.tab.on{background:var(--fg);color:var(--bg)}
+.pane[hidden]{display:none}
+.lab{display:block;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.field{width:100%;background:var(--bg);color:var(--fg);border:3px solid var(--line);padding:10px 12px;font:inherit;margin-bottom:10px}
+.field:focus{outline:none;box-shadow:4px 4px 0 var(--fg)}
+.err{border:3px solid var(--line);padding:8px 12px;font-weight:900;margin:0 0 14px}
+.err[hidden]{display:none}
+.chip{display:inline-block;border:3px solid var(--fg);padding:2px 10px;font-weight:900;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+/* platform accents: git = light red, render = light purple, mongo = light green */
+.card{--ac:#fff;border-color:var(--ac);box-shadow:10px 10px 0 var(--ac)}
+.t-git{--ac:#ff9b9b}.t-render{--ac:#c9a7ff}.t-mongo{--ac:#8affb8}
+.progress i.t-git.on{background:#ff9b9b}.progress i.t-render.on{background:#c9a7ff}.progress i.t-mongo.on{background:#8affb8}
+.kicker,.code .lbl,th{background:var(--ac)}
+.card a{color:var(--ac)}
+.card code,.flow span,.code,.field,.err,.note,.grid div{border-color:var(--ac)}
+.card button,.card .btn{border-color:var(--ac);color:var(--ac);box-shadow:6px 6px 0 var(--ac)}
+.card button:hover,.card .btn:hover{background:var(--ac);color:#000}
+.card button:active,.card .btn:active{box-shadow:0 0 0 var(--ac)}
+.card .code button,.card .tab{box-shadow:3px 3px 0 var(--ac)}
+.card .tab.on{background:var(--ac);color:#000}
+.card .nav .ghost{box-shadow:none}
+.field:focus{box-shadow:4px 4px 0 var(--ac)}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">JDBM</div>
-  <div class="tag">Janitor Jibesh Database Monk</div>
+  <a href="#" class="logo" id="home" aria-label="JDBM home">JDBM</a>
 </header>
 <main>
   <div class="progress" id="progress"></div>
   <div class="card" id="card"></div>
 </main>
 <footer>
-  Open source under the MIT License · Created by <a id="author" href="#" target="_blank" rel="noopener">Arjun M Liji</a> · <a id="repoLink" href="#" target="_blank" rel="noopener">GitHub</a>
+  Open source under the MIT License · Created by <a href="https://arjc.github.io" target="_blank" rel="noopener">Arjun M Liji</a> · <a href="https://github.com/arjc" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 <script>
 /* ===== EDIT THESE ===== */
 const CFG = {
   repo: "https://github.com/arjc/jdbm",
-  github: "https://github.com/arjc",
-  author: "https://arjc.github.io",
   buildCmd: "npm install",
   startCmd: "npm start",
   apiPath: "/api/",
   env: [
-    ["MONGODB_URI", "The MongoDB Atlas connection string from the previous step, with your password filled in."],
-    ["PORT", "Render sets this automatically. Leave it out."]
+    ["MONGODB_URI", "Atlas string (step 3)"],
+    ["ADMIN_USER", "Dashboard login"],
+    ["ADMIN_PASSWORD", "Dashboard password · don't skip"]
   ]
 };
 /* ====================== */
-document.getElementById("repoLink").href = CFG.github;
-document.getElementById("author").href = CFG.author;
 
 const code = (label, text) => `<div class="code"><span class="lbl">${label}</span><pre>${text.replace(/</g,"&lt;")}</pre><button data-copy>Copy</button></div>`;
-
-const steps = [
-  { // 0 welcome
-    html: () => `
-      <span class="kicker">Open source · MIT</span>
-      <h1>Janitor Jibesh<br>Database Monk</h1>
-      <p>JDBM is a tiny headless CMS. Create custom tables in a web interface, define their columns, add records, and every table instantly gets its own REST API for your other websites.</p>
-      <div class="grid">
-        <div><b>Tables</b>Name them, shape them.</div>
-        <div><b>Records</b>Add data from a simple UI.</div>
-        <div><b>REST API</b>One endpoint per table.</div>
-      </div>
-      <div class="nav"><span></span><button class="big" data-next>Get Started</button></div>`
-  },
-  { title: "Fork the project", html: () => `
-      <p>Forking gives you your own copy of JDBM that Render can deploy.</p>
-      <ol>
-        <li>Open the JDBM repository on GitHub.</li>
-        <li>Click <code>Fork</code> in the top right.</li>
-        <li>Choose your account and confirm.</li>
-      </ol>
-      <a class="btn" href="${CFG.repo}/fork" target="_blank" rel="noopener">Fork on GitHub ↗</a>` },
-  { title: "Create a Render account", html: () => `
-      <ol>
-        <li>Go to <a href="https://render.com" target="_blank" rel="noopener">render.com</a> and sign up.</li>
-        <li>Choose <code>Sign up with GitHub</code> so Render can see your fork.</li>
-        <li>Authorize Render to access your repositories.</li>
-      </ol>
-      <div class="note">Tip: you only need access to your JDBM fork. You can limit Render to selected repositories.</div>` },
-  { title: "Set up MongoDB Atlas", html: () => `
-      <p>JDBM stores your tables and records in MongoDB. Atlas has a free tier that works fine.</p>
-      <ol>
-        <li>Sign up at <a href="https://www.mongodb.com/cloud/atlas/register" target="_blank" rel="noopener">mongodb.com/atlas</a>.</li>
-        <li>Create a new project, then <code>Create</code> a cluster and pick the free <code>M0</code> tier.</li>
-        <li>Go to <code>Database Access</code> → <code>Add New Database User</code>. Set a username and password and give it read and write access. Keep the password simple (letters and numbers) to avoid URL-encoding trouble.</li>
-        <li>Go to <code>Network Access</code> → <code>Add IP Address</code> → <code>Allow access from anywhere</code> (<code>0.0.0.0/0</code>). Render's free services don't have a fixed IP.</li>
-        <li>Go to <code>Database</code> → <code>Connect</code> → <code>Drivers</code> and copy the connection string.</li>
-        <li>Replace <code>&lt;password&gt;</code> with your user's password and add a database name (for example <code>jdbm</code>) before the <code>?</code>.</li>
-      </ol>
-      ${code("Connection string", "mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/jdbm?retryWrites=true&w=majority")}
-      <div class="note">Keep this string private. Anyone with it can read and write your data.</div>` },
-  { title: "Create a Web Service", html: () => `
-      <ol>
-        <li>In the Render dashboard click <code>New +</code> → <code>Web Service</code>.</li>
-        <li>Pick your forked <code>JDBM</code> repository.</li>
-        <li>Choose a name, a region, and the branch <code>main</code>.</li>
-        <li>Runtime: <code>Node</code>.</li>
-      </ol>
-      ${code("Build command", CFG.buildCmd)}
-      ${code("Start command", CFG.startCmd)}` },
-  { title: "Add environment variables", html: () => `
-      <p>Open the <code>Environment</code> section of your service and add these:</p>
-      <table><tr><th>Key</th><th>What to put</th></tr>
-      ${CFG.env.map(e=>`<tr><td><code>${e[0]}</code></td><td>${e[1]}</td></tr>`).join("")}</table>
-      <p class="dim">Running locally instead? Put the same keys in a <code>.env</code> file in the project root.</p>
-      ${code(".env", CFG.env.filter(e=>e[0]!=="PORT").map(e=>e[0]+"=").join("\n"))}` },
-  { title: "Deploy", html: () => `
-      <ol>
-        <li>Click <code>Create Web Service</code>.</li>
-        <li>Watch the logs until you see the server is running.</li>
-        <li>Open the <code>.onrender.com</code> URL Render gives you.</li>
-      </ol>
-      <div class="note">Free Render services sleep after inactivity, so the first request can take about a minute to wake up.</div>` },
-  { title: "Create your first table", html: () => `
-      <ol>
-        <li>Open your JDBM URL in the browser.</li>
-        <li>Create a new table, for example <code>songs</code>.</li>
-        <li>Add columns: <code>name</code>, <code>artist</code>, <code>description</code>.</li>
-        <li>Open the table and add a few records.</li>
-      </ol>
-      <p>Other ideas: a <code>blog</code> table (title, body, date) or a <code>projects</code> table (name, link, stack).</p>` },
-  { title: "Use it in your projects", html: () => `
-      <p>Every table has an endpoint. Fetch it from any site:</p>
-      ${code("JavaScript", `const BASE = "https://your-app.onrender.com";
-
-const res = await fetch(BASE + "${CFG.apiPath}songs");
-const songs = await res.json();
-
-songs.forEach(s => console.log(s.name, "-", s.artist));`)}
-      ${code("curl", `curl https://your-app.onrender.com${CFG.apiPath}songs`)}
-      <p class="dim">If your other site runs on a different domain, make sure CORS is enabled in your JDBM server.</p>` },
-  { title: "You're done", html: () => `
-      <span class="kicker">Setup complete</span>
-      <p>Your JDBM is live. Create tables, add records, and plug the endpoints into your websites.</p>
-      <ul>
-        <li>Found a bug or want a feature? Open an issue on GitHub.</li>
-        <li>Pull requests are welcome.</li>
-        <li>Star the repo if JDBM helps you.</li>
-      </ul>
-      <a class="btn" href="${CFG.repo}" target="_blank" rel="noopener">View on GitHub ↗</a>` }
-];
+const flow = a => `<div class="flow">${a.map(x=>`<span>${x}</span>`).join("<b>→</b>")}</div>`;
 
 let i = 0;
+let baseUrl = "";
+const normUrl = v => {
+  v = (v || "").trim(); if (!v) return "";
+  if (!/^https?:\/\//i.test(v)) v = "https://" + v;
+  try { const u = new URL(v); return u.hostname.includes(".") ? u.origin : ""; } catch (_) { return ""; }
+};
+
+const steps = [
+  { html: () => `
+      <span class="kicker">Open source · MIT</span>
+      <h1>JDBM</h1>
+      <p class="dim">Janitor Jibesh Database Monk</p>
+      <p>Password-protected, public headless CMS to manage your database from any device.</p>
+      <p><span class="chip">REST API · NoSQL Database</span></p>
+      <div class="grid">
+        <div><i>▦</i>Tables</div>
+        <div><i>＋</i>Records</div>
+        <div><i>⇄</i>REST API</div>
+      </div>
+      <div class="nav"><span></span><button class="big" data-next>Get started →</button></div>`
+  },
+  { title: "Fork", p: "git", html: () => `
+      ${flow(["GitHub","Fork","Your copy"])}
+      <a class="btn" href="${CFG.repo}/fork" target="_blank" rel="noopener">Fork repo ↗</a>` },
+  { title: "Render account", p: "render", html: () => `
+      ${flow(["render.com ↗","Sign up with GitHub","Allow your fork"])}
+      <a class="btn" href="https://render.com" target="_blank" rel="noopener">Open Render ↗</a>` },
+  { title: "MongoDB Atlas", p: "mongo", html: () => `
+      <ol>
+        <li><a href="https://www.mongodb.com/cloud/atlas/register" target="_blank" rel="noopener">Sign up ↗</a> → create free <code>M0</code> cluster</li>
+        <li><code>Database Access</code> → add user <span class="dim">(simple password)</span></li>
+        <li><code>Network Access</code> → allow <code>0.0.0.0/0</code></li>
+        <li><code>Connect</code> → <code>Drivers</code> → copy string</li>
+        <li>Fill in password + db name <code>jdbm</code></li>
+      </ol>
+      ${code("Connection string", "mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/jdbm?retryWrites=true&w=majority")}
+      <div class="note">⚠ Keep it private.</div>` },
+  { title: "Render: Web Service", p: "render", html: () => `
+      <a class="btn" href="https://dashboard.render.com" target="_blank" rel="noopener">Open Render ↗</a>
+      <ol style="margin-top:18px">
+        <li>In Render: <code>New +</code> → <code>Web Service</code></li>
+        <li>Pick your fork · Runtime <code>Node</code></li>
+        <li>Paste:</li>
+      </ol>
+      ${code("Render · Build command", CFG.buildCmd)}
+      ${code("Render · Start command", CFG.startCmd)}` },
+  { title: "Render: Env vars", p: "render", html: () => `
+      <p>Render → your service → <code>Environment</code> → add:</p>
+      <table><tr><th>Key</th><th>Value</th></tr>
+      ${CFG.env.map(e=>`<tr><td><code>${e[0]}</code></td><td>${e[1]}</td></tr>`).join("")}</table>
+      ${code("Local only · .env", CFG.env.map(e=>e[0]+"=").join("\n"))}` },
+  { title: "Render: Deploy", p: "render", needsUrl: true, html: () => `
+      ${flow(["Render: Create Web Service","Wait for Logs ✓","Copy URL"])}
+      <div class="note">⏱ Free tier sleeps. First load ≈ 1 min.</div>
+      <label class="lab" for="urlInput">Your Render URL ↓</label>
+      <input id="urlInput" class="field" type="url" placeholder="https://jdbm-xxxx.onrender.com" value="${baseUrl}" autocomplete="off" spellcheck="false">
+      <p class="err" id="urlErr" hidden>⚠ Enter your full URL to continue.</p>` },
+  { title: "First table", html: () => `
+      <ol>
+        <li>Open <a href="${baseUrl}" target="_blank" rel="noopener">${baseUrl}</a> → log in</li>
+        <li><code>New table</code> → <code>songs</code></li>
+        <li>Columns → <code>name</code> <code>artist</code> <code>description</code></li>
+        <li>Add records</li>
+      </ol>` },
+  { title: "Use the API", html: () => {
+      const U = (baseUrl || "https://your-app.onrender.com") + CFG.apiPath + "songs";
+      const L = [
+        ["JavaScript", `const res = await fetch("${U}");
+const songs = await res.json();
+songs.forEach(s => console.log(s.name, "-", s.artist));`],
+        ["Python", `import requests
+
+songs = requests.get("${U}").json()
+for s in songs:
+    print(s["name"], "-", s["artist"])`],
+        ["curl", `curl ${U}`],
+        ["PHP", `<?php
+$songs = json_decode(file_get_contents("${U}"), true);
+foreach ($songs as $s) {
+    echo $s["name"] . " - " . $s["artist"] . "\n";
+}`],
+        ["Java", `import java.net.URI;
+import java.net.http.*;
+
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest req = HttpRequest.newBuilder()
+    .uri(URI.create("${U}"))
+    .build();
+String json = client.send(req, HttpResponse.BodyHandlers.ofString()).body();
+System.out.println(json);`],
+        ["C#", `using var http = new HttpClient();
+var json = await http.GetStringAsync("${U}");
+Console.WriteLine(json);`],
+        ["Go", `resp, err := http.Get("${U}")
+if err != nil { panic(err) }
+defer resp.Body.Close()
+body, _ := io.ReadAll(resp.Body)
+fmt.Println(string(body))`],
+        ["Ruby", `require "net/http"
+require "json"
+
+songs = JSON.parse(Net::HTTP.get(URI("${U}")))
+songs.each { |s| puts "#{s['name']} - #{s['artist']}" }`],
+        ["Rust", `// Cargo.toml: reqwest = { version = "0.12", features = ["blocking"] }
+fn main() -> Result<(), reqwest::Error> {
+    let body = reqwest::blocking::get("${U}")?.text()?;
+    println!("{}", body);
+    Ok(())
+}`],
+        ["C++", `// link with -lcurl
+#include <curl/curl.h>
+#include <iostream>
+#include <string>
+
+static size_t write_cb(char* p, size_t s, size_t n, void* out) {
+    static_cast<std::string*>(out)->append(p, s * n);
+    return s * n;
+}
+
+int main() {
+    std::string body;
+    CURL* c = curl_easy_init();
+    curl_easy_setopt(c, CURLOPT_URL, "${U}");
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(c, CURLOPT_WRITEDATA, &body);
+    curl_easy_perform(c);
+    curl_easy_cleanup(c);
+    std::cout << body << std::endl;
+}`],
+        ["C", `// link with -lcurl
+#include <curl/curl.h>
+
+int main(void) {
+    CURL *c = curl_easy_init();
+    curl_easy_setopt(c, CURLOPT_URL, "${U}");
+    curl_easy_perform(c);   /* prints the JSON to stdout */
+    curl_easy_cleanup(c);
+    return 0;
+}`],
+        ["Kotlin", `import java.net.URL
+
+fun main() {
+    val json = URL("${U}").readText()
+    println(json)
+}`],
+        ["Swift", `import Foundation
+
+let url = URL(string: "${U}")!
+let (data, _) = try await URLSession.shared.data(from: url)
+print(String(data: data, encoding: .utf8)!)`],
+        ["Dart", `import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final res = await http.get(Uri.parse('${U}'));
+  final songs = jsonDecode(res.body) as List;
+  for (final s in songs) {
+    print(s['name'].toString() + ' - ' + s['artist'].toString());
+  }
+}`]
+      ];
+      return `<div class="tabs">${L.map((l,k)=>`<button class="tab${k?'':' on'}" data-lang="${k}">${l[0]}</button>`).join("")}</div>
+      ${L.map((l,k)=>`<div class="pane" data-pane="${k}"${k?' hidden':''}>${code(l[0], l[1])}</div>`).join("")}
+      <p class="dim"><code>songs</code> → your table · add <code>/id</code> → one record · CORS on ✓</p>`; } },
+  { title: "Done ✓", html: () => `
+      <p>Live ✓ Make tables → fetch anywhere.</p>
+      <ul>
+        <li>Bug → open an issue</li>
+        <li>Idea → send a PR</li>
+        <li>Like it → ★ star</li>
+      </ul>
+      ${baseUrl ? `<a class="btn" style="margin:0 14px 14px 0" href="${baseUrl}" target="_blank" rel="noopener">Open my JDBM ↗</a>` : ""}<a class="btn" href="${CFG.repo}" target="_blank" rel="noopener">GitHub ↗</a>` }
+];
+
+const PLAT = {git:"GitHub",render:"Render",mongo:"MongoDB"};
 const card = document.getElementById("card"), prog = document.getElementById("progress");
 function render(){
-  const s = steps[i];
-  prog.innerHTML = steps.map((_,k)=>`<i class="${k<=i&&i>0?'on':''}"></i>`).join("");
+  const s = steps[i], last = i === steps.length - 1;
+  prog.innerHTML = steps.map((st,k)=>`<i class="${k<=i&&i>0?'on':''} ${st.p?'t-'+st.p:''}"></i>`).join("");
+  card.className = "card" + (s.p ? " t-" + s.p : "");
   prog.style.visibility = i===0 ? "hidden" : "visible";
   if(i===0){ card.innerHTML = s.html(); }
   else {
-    const last = i===steps.length-1;
-    card.innerHTML = `<span class="kicker">Step ${i} of ${steps.length-1}</span><h2>${s.title}</h2>${s.html()}
-      <div class="nav"><button class="ghost" data-back>Back</button>${last?'<button data-restart>Start over</button>':'<button data-next>Next</button>'}</div>`;
+    card.innerHTML = `${last?"":`<span class="kicker">Step ${i} / ${steps.length-2}${s.p?" · "+PLAT[s.p]:""}</span>`}<h2>${s.title}</h2>${s.html()}
+      <div class="nav"><button class="ghost" data-back>← Back</button>${last?'<button data-restart>Start over ↺</button>':'<button data-next>Next →</button>'}</div>`;
   }
   window.scrollTo(0,0);
 }
 card.addEventListener("click", e=>{
   const t = e.target.closest("button"); if(!t) return;
-  if(t.hasAttribute("data-next")){ i++; render(); }
+  if(t.hasAttribute("data-next")){
+    if(steps[i].needsUrl){
+      const v = normUrl(document.getElementById("urlInput").value);
+      if(!v){ document.getElementById("urlErr").hidden = false; document.getElementById("urlInput").focus(); return; }
+      baseUrl = v;
+    }
+    i++; render();
+  }
   else if(t.hasAttribute("data-back")){ i--; render(); }
   else if(t.hasAttribute("data-restart")){ i=0; render(); }
+  else if(t.hasAttribute("data-lang")){
+    const k=t.getAttribute("data-lang");
+    card.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b===t));
+    card.querySelectorAll(".pane").forEach(p=>p.hidden=p.getAttribute("data-pane")!==k);
+  }
   else if(t.hasAttribute("data-copy")){
     const txt = t.parentElement.querySelector("pre").textContent;
-    const done = ()=>{ t.textContent="Copied"; setTimeout(()=>t.textContent="Copy",1200); };
+    const done = ()=>{ t.textContent="Copied ✓"; setTimeout(()=>t.textContent="Copy",1200); };
     try{ navigator.clipboard.writeText(txt).then(done,done); }catch(_){ done(); }
   }
 });
+document.getElementById("home").addEventListener("click", e=>{ e.preventDefault(); i=0; render(); });
+card.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.id==="urlInput"){ e.preventDefault(); card.querySelector("[data-next]").click(); } });
 render();
 </script>
 </body>
